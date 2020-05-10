@@ -73,4 +73,4 @@
   become_user: '{{ unix_user }}'
   template:
     src: "{{ local_settings_src }}"
-    dest: "{{ deployment_path }}{{ project_name }}/"
+    dest: "{{ deployment_path }}{{ project_name }}/local_settings.py"
