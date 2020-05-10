@@ -26,15 +26,26 @@
   register: public_key
   changed_when: no
 
-- name: Deployment key is set.
+- name: Bitbucket deployment key is set.
   bitbucket_access_key:
-    repository: "capoeira_piraeus"
-    username: "dandaraweb"
+    repository: "{{ repository_name }}"
+    username: "{{ repository_username }}"
     client_id: "{{ bitbucket_client_id }}"
     client_secret: "{{ bitbucket_client_secret }}"
     key: "{{ public_key.stdout }}"
     label: "{{ unix_user }}@{{ ansible_hostname }}"
     state: present
+  when: repository_url.find("bitbucket.org") != -1
+
+- name: Github deployment key is set.
+  github_deploy_key:
+    owner: "{{ repository_username }}"
+    token: "{{ github_access_token }}"
+    repository: "{{ repository_name }}"
+    key: "{{ public_key.stdout }}"
+    label: "{{ unix_user }}@{{ ansible_hostname }}"
+    state: present
+  when: repository_url.find("github.com") != -1
 
 - name: Deployment directory exists.
   file:
@@ -48,8 +59,8 @@
   git:
     accept_hostkey: yes
     dest: "{{ deployment_path }}"
-    repo: "{{ repo }}"
-    version: "{{ repo_branch }}"
+    repo: "{{ repository_url }}"
+    version: "{{ repository_version }}"
 
 - name: Python modules are installed.
   become_user: "{{ unix_user }}"
