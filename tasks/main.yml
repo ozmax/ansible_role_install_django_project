@@ -61,5 +61,5 @@
 - name: Django local settings are set.
   become_user: '{{ unix_user }}'
   template:
-    src: templates/local_settings.py
+    src: "{{ local_settings_src }}"
     dest: "{{ deployment_path }}{{ project_name }}/"
