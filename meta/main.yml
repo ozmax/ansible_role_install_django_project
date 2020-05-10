@@ -1,0 +1,9 @@
+---
+
+galaxy_info:
+  author: ozmax <me@ozmax.eu>
+
+  platforms:
+    - name: "Debian"
+      versions:
+        - "buster"

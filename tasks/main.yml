@@ -1,0 +1,65 @@
+---
+
+- name: System packages are installed.
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+    force_apt_get: yes
+  vars:
+    packages:
+    - git
+    - python3
+    - python3-pip
+    - python3-venv
+    - python3-psycopg2
+
+- name: User is generated.
+  user:
+    name: "{{ unix_user }}"
+    shell: "/bin/bash"
+    generate_ssh_key: yes
+    ssh_key_bits: 2048
+
+- name: Register public key in variable.
+  shell: "cat /home/{{ unix_user }}/.ssh/id_rsa.pub"
+  register: public_key
+  changed_when: no
+
+- name: Deployment key is set.
+  bitbucket_access_key:
+    repository: "capoeira_piraeus"
+    username: "dandaraweb"
+    client_id: "{{ bitbucket_client_id }}"
+    client_secret: "{{ bitbucket_client_secret }}"
+    key: "{{ public_key.stdout }}"
+    label: "{{ unix_user }}@{{ ansible_hostname }}"
+    state: present
+
+- name: Deployment directory exists.
+  file:
+    path: "{{ deployment_path }}"
+    state: directory
+    owner: "{{ unix_user }}"
+    group: "{{ unix_user }}"
+
+- name: Repository is cloned.
+  become_user: "{{ unix_user }}"
+  git:
+    accept_hostkey: yes
+    dest: "{{ deployment_path }}"
+    repo: "{{ repo }}"
+    version: "{{ repo_branch }}"
+
+- name: Python modules are installed.
+  become_user: "{{ unix_user }}"
+  pip:
+    requirements: "{{ deployment_path }}/requirements.txt"
+    virtualenv: "{{ virtualenv }}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+
+- name: Django local settings are set.
+  become_user: '{{ unix_user }}'
+  template:
+    src: templates/local_settings.py
+    dest: "{{ deployment_path }}{{ project_name }}/"
