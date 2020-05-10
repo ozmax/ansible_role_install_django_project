@@ -1,1 +1,1 @@
-local_settings_src: "templates/local_settings.py"
+local_settings_src: "templates/local_settings_base.py"
