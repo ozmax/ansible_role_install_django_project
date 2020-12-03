@@ -58,6 +58,7 @@
   become_user: "{{ unix_user }}"
   git:
     accept_hostkey: yes
+    force: yes
     dest: "{{ deployment_path }}"
     repo: "{{ repository_url }}"
     version: "{{ repository_version }}"
